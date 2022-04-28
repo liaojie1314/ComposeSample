@@ -11,6 +11,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.composesample.model.entity.ArticleEntity
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 
 /**
  * 文章列表 item
@@ -19,7 +22,11 @@ import com.example.composesample.model.entity.ArticleEntity
  * @param modifier
  */
 @Composable
-fun ArticleItem(article: ArticleEntity, modifier: Modifier = Modifier) {
+fun ArticleItem(
+    article: ArticleEntity,
+    loaded: Boolean,
+    modifier: Modifier = Modifier
+) {
 
     Column(modifier = modifier.padding(8.dp)) {
         Text(
@@ -28,7 +35,12 @@ fun ArticleItem(article: ArticleEntity, modifier: Modifier = Modifier) {
             fontSize = 16.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .placeholder(
+                    visible = !loaded,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
         )
 
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
@@ -37,7 +49,11 @@ fun ArticleItem(article: ArticleEntity, modifier: Modifier = Modifier) {
                 color = Color(0xFF999999),
                 fontSize = 10.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.placeholder(
+                    visible = !loaded,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
             )
 
             Text(
@@ -45,7 +61,11 @@ fun ArticleItem(article: ArticleEntity, modifier: Modifier = Modifier) {
                 color = Color(0xFF999999),
                 fontSize = 10.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.placeholder(
+                    visible = !loaded,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
             )
         }
         Spacer(Modifier.height(8.dp))

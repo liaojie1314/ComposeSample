@@ -1,10 +1,12 @@
 package com.example.composesample.ui.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.placeholder.placeholder
+import com.example.composesample.extension.OnBottomReached
 import com.example.composesample.ui.components.ArticleItem
 import com.example.composesample.ui.components.NotificationContent
 import com.example.composesample.ui.components.SwiperContent
@@ -30,6 +33,10 @@ import com.example.composesample.ui.components.VideoItem
 import com.example.composesample.viewmodel.ArticleViewModel
 import com.example.composesample.viewmodel.MainViewModel
 import com.example.composesample.viewmodel.VideoViewModel
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class)
@@ -44,7 +51,22 @@ fun StudyScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        //获取分类数据
         vm.categoryData()
+        //获取文章列表数据
+        articleViewModel.fetchArticleList()
+
+        //获取视频列表数据
+        videoViewModel.fetchList()
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val lazyListState = rememberLazyListState()
+    lazyListState.OnBottomReached(buffer = 3){
+        coroutineScope.launch {
+            if (vm.showArticleList) articleViewModel.loadMore() else videoViewModel.loadMore()
+        }
     }
 
     Column(modifier = Modifier) {
@@ -159,28 +181,37 @@ fun StudyScreen(
             }
         }
 
-        LazyColumn() {
-            //轮播图
-            item { SwiperContent(vm) }
-
-            //通知公告
-            item { NotificationContent(vm) }
-
-            if (vm.showArticleList) {
-                //文章列表
-                items(articleViewModel.list) { article ->
-                    ArticleItem(
-                        article,
-                        modifier = Modifier.clickable {
-                            onNavigateToArticle()
-                        })
+        SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing = if (vm.showArticleList) articleViewModel.refreshing else videoViewModel.refreshing),
+            onRefresh = {
+                coroutineScope.launch {
+                    if (vm.showArticleList) articleViewModel.refresh() else videoViewModel.refresh()
                 }
-            } else {
-                //视频列表
-                items(videoViewModel.list) { videoEntity ->
-                    VideoItem(modifier = Modifier.clickable {
-                        onNavigateToVideo()
-                    }, videoEntity)
+            }) {
+            LazyColumn(state = lazyListState) {
+                //轮播图
+                item { SwiperContent(vm) }
+
+                //通知公告
+                item { NotificationContent(vm) }
+
+                if (vm.showArticleList) {
+                    //文章列表
+                    items(articleViewModel.list) { article ->
+                        ArticleItem(
+                            article,
+                            articleViewModel.listLoaded,
+                            modifier = Modifier.clickable {
+                                onNavigateToArticle()
+                            })
+                    }
+                } else {
+                    //视频列表
+                    items(videoViewModel.list) { videoEntity ->
+                        VideoItem(modifier = Modifier.clickable {
+                            onNavigateToVideo()
+                        }, videoEntity,
+                        videoViewModel.listLoaded)
+                    }
                 }
             }
         }

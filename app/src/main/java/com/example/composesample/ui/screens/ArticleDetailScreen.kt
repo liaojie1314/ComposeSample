@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +25,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ArticleDetailScreen(articleViewModel: ArticleViewModel = viewModel(), onBack: () -> Unit) {
+
+    LaunchedEffect(Unit){
+        articleViewModel.fetchInfo()
+    }
 
     val webViewState = rememberWebViewState(data = articleViewModel.content)
 
@@ -121,7 +126,12 @@ fun ArticleDetailScreen(articleViewModel: ArticleViewModel = viewModel(), onBack
         },
         sheetPeekHeight = 0.dp
     ) {
-        WebView(webViewState)
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            WebView(webViewState)
+            if(!articleViewModel.infoLoaded){
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 

@@ -20,9 +20,12 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import com.example.composesample.model.entity.VideoEntity
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 
 @Composable
-fun VideoItem(modifier: Modifier = Modifier, videoEntity: VideoEntity) {
+fun VideoItem(modifier: Modifier = Modifier, videoEntity: VideoEntity, loaded: Boolean) {
 
     val constraintSet = ConstraintSet {
         val title = createRefFor("title")
@@ -71,6 +74,7 @@ fun VideoItem(modifier: Modifier = Modifier, videoEntity: VideoEntity) {
                 .layoutId("cover")
                 .aspectRatio(16 / 9f)
                 .clip(RoundedCornerShape(8.dp))
+                .placeholder(visible = !loaded, highlight = PlaceholderHighlight.shimmer())
         )
 
         Text(
@@ -79,16 +83,20 @@ fun VideoItem(modifier: Modifier = Modifier, videoEntity: VideoEntity) {
             color = Color(0xFF666666),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.layoutId("title")
+            modifier = Modifier
+                .layoutId("title")
+                .placeholder(visible = !loaded, highlight = PlaceholderHighlight.shimmer())
         )
 
         Text(
-            text = videoEntity.type,
+            text = videoEntity.type ?: "",
             fontSize = 10.sp,
             color = Color(0xFF999999),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.layoutId("type")
+            modifier = Modifier
+                .layoutId("type")
+                .placeholder(visible = !loaded, highlight = PlaceholderHighlight.shimmer())
         )
 
         Text(
@@ -97,7 +105,9 @@ fun VideoItem(modifier: Modifier = Modifier, videoEntity: VideoEntity) {
             color = Color(0xFF999999),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.layoutId("duration")
+            modifier = Modifier
+                .layoutId("duration")
+                .placeholder(visible = !loaded, highlight = PlaceholderHighlight.shimmer())
         )
 
         Divider(
